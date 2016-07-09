@@ -15,7 +15,8 @@ func main() {
 		// err is already formatted by the decodeKey function
 		fmt.Println(err)
 	}
-	fmt.Println(getTOTP(key, intToBytes(currPeriod())))
+	otp := getTOTP(key, intToBytes(currPeriod()))
+	fmt.Printf("%06d\n", otp)
 
 }
 
