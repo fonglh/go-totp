@@ -1,8 +1,8 @@
 package main
 
 import (
-	//	"crypto/hmac"
-	//"crypto/sha1"
+	"crypto/hmac"
+	"crypto/sha1"
 	"encoding/base32"
 	"fmt"
 	"time"
@@ -15,10 +15,8 @@ func main() {
 		// err is already formatted by the decodeKey function
 		fmt.Println(err)
 	}
-	fmt.Println(key)
-	fmt.Println(intToBytes(currPeriod()))
+	fmt.Println(getTOTP(key, intToBytes(currPeriod())))
 
-	//	mac := hmac.New(sha1.New, "abc")
 }
 
 // The secret from most services implementing 2FA is given
@@ -53,4 +51,30 @@ func intToBytes(val int64) []byte {
 	}
 
 	return result
+}
+
+// Returns 6 digit OTP number
+// Steps adapted from http://jacob.jkrall.net/totp/
+func getTOTP(secret, interval []byte) uint {
+	otp := uint(0)
+	mac := hmac.New(sha1.New, secret)
+	mac.Write(interval)
+	digest := mac.Sum(nil)
+
+	// offset is the lower 4 bits of the last byte,
+	// the last hex digit of the digest
+	offset := digest[19] & 0x0f
+
+	// slice 4 bytes from the offset
+	slice := digest[offset : offset+4]
+	//clear top bit
+	slice[0] = slice[0] & 0x7f
+
+	//convert slice to decimal
+	for i := 0; i < 4; i++ {
+		otp = otp + (uint(slice[i]) << uint((3-i)*8))
+	}
+
+	// return the last 6 digits
+	return otp % 1000000
 }
