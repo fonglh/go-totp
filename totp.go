@@ -5,12 +5,19 @@ import (
 	"crypto/sha1"
 	"encoding/base32"
 	"fmt"
+	"os"
+	"strings"
 	"time"
 )
 
 func main() {
+	if len(os.Args) != 2 {
+		fmt.Println("Pass in the shared secret")
+		os.Exit(1)
+	}
+	base32Secret := strings.ToUpper(os.Args[1])
 
-	key, err := decodeKey("ABCDEFGHIJKLMNOP")
+	key, err := decodeKey(base32Secret)
 	if err != nil {
 		// err is already formatted by the decodeKey function
 		fmt.Println(err)
